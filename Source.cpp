@@ -3,11 +3,15 @@
 #include<allegro5/allegro_image.h>
 #include<vector>
 #include<string>
+#include<math.h>
+#include<iostream>
+using namespace std;
 
 const float FPS = 60;
 const int SCREEN_W = 1000;
 const int SCREEN_H = 800;
-const int BOUNCER_SIZE = 32;
+const int BOUNCER_SIZE = 0;
+const int ELEMENTWIDTH = 100;
 
 class element {
 private:
@@ -21,6 +25,11 @@ public:
 	void initElement(int x, int y, int i, ALLEGRO_BITMAP *picture);
 	void drawElement();
 	void PrintInfo();
+	bool clicked(int x, int y);
+	void liftUp();
+	bool isLifted();
+	void move(int x, int y);
+	void PutDown();
 
 
 };
@@ -82,6 +91,9 @@ int main()
 		al_wait_for_event(event_queue, &ev);
 
 		if (ev.type == ALLEGRO_EVENT_TIMER) {
+			if (air.isLifted()) {
+				air.move(bouncer_x, bouncer_y);
+			}
 			redraw = true;
 		}
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
@@ -92,10 +104,21 @@ int main()
 
 			bouncer_x = ev.mouse.x;
 			bouncer_y = ev.mouse.y;
+
+			
 		}
+		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+			if (air.clicked(bouncer_x, bouncer_y))
+				if (air.isLifted() == false)
+					air.liftUp();
+				else
+					air.PutDown();
+		}
+		
 		else if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_UP) {
-			break;
+			
 		}
+	
 
 		if (redraw && al_is_event_queue_empty(event_queue)) {
 			redraw = false;
@@ -132,3 +155,39 @@ void element::drawElement() {
 	al_draw_bitmap(image, xpos, ypos, 0);
 }
 void element::PrintInfo(){}
+
+bool element::clicked(int x, int y) {
+
+	//distance formula
+	if (sqrt((((xpos+ELEMENTWIDTH/2) - x)*((xpos+ELEMENTWIDTH/2) - x)) + (((ypos+ELEMENTWIDTH/2) - y)*((ypos+ELEMENTWIDTH/2) - y))) < ELEMENTWIDTH/2) {
+		cout << "element clicked!" << endl;
+		return true;
+
+	}
+	else
+		return false;
+
+
+}
+
+void element::liftUp() {
+	lifted = true;
+
+}
+
+void element::PutDown(){
+	lifted = false;
+
+}
+
+bool element::isLifted() {
+
+	return lifted;
+}
+
+void element::move(int x, int y) {
+	xpos = x-ELEMENTWIDTH/2;
+	ypos = y-ELEMENTWIDTH/2;
+
+
+}
